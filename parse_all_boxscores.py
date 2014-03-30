@@ -9,6 +9,9 @@ from basketball_reference import boxscore
 import pandas
 
 def run():
+  """
+  Output team totals.
+  """
   output_file = '2013_games_data.csv'
   boxscore_files = glob.glob('boxscores/*.html')
   n = len(boxscore_files)
@@ -42,6 +45,45 @@ def run():
   df.to_csv(output_file, index=False)
   return df
 
+def boxscores_diff(csv_path):
+    """
+    Take differential of winner minus loser
+    """
+    df = pandas.read_csv(csv_path)
+
+    # Did home team win?
+    home_win = df.home_pts > df.visiting_pts
+
+    # Split the stats into visiting and home
+    stats_index = df.columns[2:]
+    n = len(stats_index)/2
+    visiting_index = stats_index[:n]
+    home_index = stats_index[n:]
+
+    home_stats = df[home_index]
+    visiting_stats = df[visiting_index]
+
+    # Reindex the home and visiting dataframes
+    new_cols = [colname.split('_', 1)[1] for colname in home_stats.columns]
+    home_stats.columns = new_cols
+    visiting_stats.columns = new_cols
+
+    # Take differential
+    win_differential = home_stats - visiting_stats
+
+    # Negate values where the home team loss
+    home_loss = win_differential.pts < 0
+    win_differential.ix[home_loss] = -win_differential.ix[home_loss]
+
+    return win_differential 
+
+def run2():
+  # Compute win differentials
+  csv = 'data/2013_games_data.csv'
+  diff = boxscores_diff(csv)
+  diff.to_csv('2013_games_data_diff.csv', index=False)
+
 
 if __name__ == '__main__':
-  run()
+  #run()
+  run2()

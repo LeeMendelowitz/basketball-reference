@@ -1,6 +1,7 @@
 """
-Parse games table.
+Download all 2013 boxscores.
 """
+
 import os
 import sys
 from file_utils import make_dirs
@@ -25,18 +26,19 @@ def download_boxscores():
   urls = df['box_score_url']
 
   #import pdb; pdb.set_trace()
-  for url in urls:
+  n = len(urls)
+
+  for i, url in enumerate(urls):
     url = url.lstrip('/')
     dirpath = os.path.dirname(url)
     make_dirs(dirpath)
 
-    sys.stderr.write("Downloading file %s..."%url)
-
-    full_url = '%s%s'%(URL_BASE, url)
+    full_url = '%s/%s'%(URL_BASE, url)
+    sys.stderr.write("Downloading file %i of %i: %s..."%(i, n, full_url))
+  
     response = requests.get(full_url)
-    f = open(url, 'w')
-    f.write(response.text)
-    f.close()
+    with open(url, 'w') as f:
+      f.write(response.text.encode('utf-8', errors='ignore'))
 
     sys.stderr.write('done!\n')
 

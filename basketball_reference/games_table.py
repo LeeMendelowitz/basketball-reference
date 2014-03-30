@@ -74,6 +74,8 @@ def download(year, output_path=None):
     fout.write(response.text)
     fout.close()
 
+  return response.text
+
 def to_csv(src_file, output_path):
   """
   Convert the source file stored locally to a csv file.
